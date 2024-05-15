@@ -1,0 +1,160 @@
+ def sub_menu(self):
+        self.a = 2
+        if self.a:
+
+            self.sub_menu_option = option_menu(
+                menu_title="",
+                options=["Account Det.", "Deposit", "Withdrawals", "Fund Transfer", "Transactions"],
+                icons=["people", "receipt", "wallet", "repeat", "list"],
+                default_index=0,
+                orientation="horizontal",
+                styles={
+                    "container": {"background-color": "gray"},
+                    "icon": {"color": "white", "font-size": "16px"},
+                    "nav-link": {"color": "white", "font-size": "16px", "text-align": "left",
+                                 "--hover-color": "black", "padding": "10px"},
+                    "nav-link-selected": {"background-color": "black"}
+                }
+            )
+            return
+        else:
+            st.write("Hello")
+
+
+
+#============================================================================================================
+
+
+# Example usage:
+if __name__ == "__main__":
+    # Initialize DatabaseConnector
+    db = DatabaseConnector()
+
+    # Connect to the database
+    db.connect()
+
+    # Execute some queries
+    db.execute_query("CREATE TABLE IF NOT EXISTS test_table (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(50))")
+    db.execute_query("INSERT INTO test_table (name) VALUES ('John')")
+    db.execute_query("INSERT INTO test_table (name) VALUES ('Jane')")
+
+    # Disconnect from the database
+    db.disconnect()
+
+
+
+ #==================++++++===============================================
+ for later testing database class
+
+ class DatabaseConnector:
+    def __init__(self):
+        self.host = 'localhost'
+        self.user = 'root'
+        self.password = 'ahmed@786'
+        self.dbname = 'bank_db'
+        self.port = 3306  # Default port for MySQL
+        self.connection = None
+
+
+  # -----------------------------------------
+
+   # Withdraw button
+            if st.button("Withdraw"):
+                if amount > 0 and amount <= self.total_balance:
+                    self.total_balance -= amount
+                    st.session_state['total_balance'] = self.total_balance  # Update session state
+                    st.success(f"Amount ${amount:.2f} withdrawn successfully. New balance is ${self.total_balance:.2f}.")
+                else:
+                    st.error("Insufficient funds.")
+
+
+
+   #----------------------------------
+
+
+    def search_account_old(self):
+        account_number = st.text_input("Enter account number to search:", "")
+        if st.button("Search"):
+            if account_number:
+                result = self.db.search_account(account_number)
+                if result:
+                    st.write("Account Found:")
+                    st.write(f"Account ID: {result[0]}")
+                    st.write(f"Account Number: {result[1]}")
+                    st.write(f"Customer Name: {result[2]}")
+                    st.write(f"Email ID: {result[3]}")
+                    st.write(f"Phone Number: {result[4]}")
+                    st.write(f"Account Type: {result[5]}")
+                    st.write(f"Total Balance: {result[6]}")
+                    st.write(f"Customer Address: {result[7]}")
+                    st.write(f"Created On: {result[8]}")
+
+
+                else:
+                    st.write("Account not found.")
+            else:
+                st.write("Please enter an account number.")
+
+
+
+#----------------------------------
+
+
+    def display_old_ok_change(self):
+        if 'account_number' in st.session_state and 'total_balance' in st.session_state and 'account_type' in st.session_state:
+            self.account_number = st.session_state['account_number']
+            self.total_balance = st.session_state['total_balance']
+            self.account_type = st.session_state['account_type']
+
+            st.write(f"Account Number: {self.account_number}")
+            st.write(f"Account Type: {self.account_type}")
+            st.write(f"Current Balance: ${self.total_balance:.2f}")
+
+            amount = st.number_input("Enter amount to withdraw:", min_value=0.01, step=0.01, format="%.2f")
+            amount_decimal = Decimal(amount)  # Convert float to Decimal
+
+            if st.button("Withdraw"):
+                if amount_decimal > 0 and amount_decimal <= self.total_balance:
+                    if self.db.update_balance(self.account_number, amount_decimal) and self.db.record_transaction(
+                            self.account_number, amount_decimal, 'withdrawal', 'Withdrawal from ATM'):
+                        self.total_balance -= amount_decimal  # Use Decimal for arithmetic
+                        st.session_state['total_balance'] = self.total_balance
+
+                        success_message = f"""
+                                                <div style='background-color: #36a12a; color: white; font-size: 30px; text-align: center; padding: 10px; border-radius: 15px; width:50%; margin: 0 auto;'>
+                                                    <strong>Amount : </strong> ${amount_decimal:.2f} <p>withdrawn successfully.</p> <strong>New balance is:</strong> ${self.total_balance:.2f}.
+                                                </div>
+                                                """
+                        st.markdown(success_message, unsafe_allow_html=True)
+                    else:
+                        st.error("Failed to process the withdrawal.")
+                else:
+                    st.error("Insufficient funds.")
+        else:
+            st.error("Please select an account to perform a withdrawal.")
+
+
+#--------------------------------------
+
+
+class SavingsAccount(Account):
+    def withdraw(self, amount):
+        fee = Decimal('0.00')
+        if amount > Decimal('1000.00'):
+            fee = amount * Decimal('0.02')  # Convert float to Decimal
+        total_amount = amount + fee
+        if total_amount > self.balance:
+            return "Insufficient funds", fee
+        self.balance -= total_amount
+        return self.balance, fee
+
+class CurrentAccount(Account):
+    def withdraw(self, amount):
+        fee = Decimal('0.00')
+        if amount > Decimal('5000.00'):
+            fee = amount * Decimal('0.02')  # Convert float to Decimal
+        total_amount = amount + fee
+        if total_amount > self.balance:
+            return "Insufficient funds", fee
+        self.balance -= total_amount
+        return self.balance, fee
