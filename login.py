@@ -4,10 +4,6 @@ from auth_controller import authenticate_user
 
 def login_page():
 
-
-
-
-
     col1, col2, col3 = st.columns([2, 1, 2])
     with col2:
         st.image("images/login_img.jpeg", width=200)  # Adjust the path to your logo image
