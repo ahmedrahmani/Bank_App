@@ -6,10 +6,10 @@ from datetime import datetime
 
 class DatabaseConnector:
     def __init__(self):
-        self.host = 'localhost'
-        self.user = 'root'
-        self.password = 'ahmed@786'
-        self.dbname = 'bank_db'
+        self.host = 'sql8.freesqldatabase.com'
+        self.user = 'sql8707280'
+        self.password = 'ZwRRg72v9H'
+        self.dbname = 'sql8707280'
         self.port = 3306  # Default port for MySQL
 
         self.connection = None
