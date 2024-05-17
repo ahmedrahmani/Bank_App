@@ -1,7 +1,6 @@
 import mysql.connector
 from datetime import datetime
 
-
 class DatabaseConnector:
     def __init__(self):
         self.host = 'sql8.freesqldatabase.com'
